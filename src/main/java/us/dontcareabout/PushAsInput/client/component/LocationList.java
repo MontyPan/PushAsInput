@@ -1,6 +1,8 @@
 package us.dontcareabout.PushAsInput.client.component;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 
 import com.sencha.gxt.chart.client.draw.RGB;
 import com.sencha.gxt.chart.client.draw.sprite.SpriteSelectionEvent;
@@ -15,8 +17,22 @@ public class LocationList extends LayerContainer {
 	public void setData(ArrayList<Singapore> data) {
 		this.clear();
 
-		for (Singapore loc : data) {
-			Button btn = new Button(loc.getLocation());
+		HashMap<String, Integer> map = new HashMap<>();
+
+		for (Singapore sg : data) {
+			Integer counter = map.get(sg.getLocation());
+			if (counter == null) {
+				map.put(sg.getLocation(), 1);
+			} else {
+				map.put(sg.getLocation(), counter + 1);
+			}
+		}
+
+		ArrayList<String> foo = new ArrayList<>(map.keySet());
+		Collections.sort(foo);
+
+		for (String loc : foo) {
+			Button btn = new Button(loc, map.get(loc));
 			this.addLayer(btn);
 			btn.redraw(true);
 		}
@@ -39,11 +55,11 @@ public class LocationList extends LayerContainer {
 	}
 
 	class Button extends TextButton {
-		Button(String text) {
+		Button(final String text, int amount) {
 			setBgColor(RGB.DARKGRAY);
 			setTextColor(RGB.WHITE);
 			setBgRadius(10);
-			setText(text);
+			setText(text + " (" + amount + ")");
 
 			addSpriteSelectionHandler(new SpriteSelectionHandler() {
 				@Override
