@@ -13,8 +13,6 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 
-import us.dontcareabout.PushAsInput.shared.ContentParse;
-import us.dontcareabout.PushAsInput.shared.RawPush;
 import us.dontcareabout.PushAsInput.shared.Singapore;
 import us.dontcareabout.gxt.client.model.NoExceptionValueProvider;
 
@@ -27,17 +25,9 @@ public class SingaporeGrid extends Grid<Singapore> {
 		getView().setForceFit(true);
 	}
 
-	public void setData(ArrayList<RawPush> data) {
-		for (RawPush rp : data) {
-			Singapore tupple = ContentParse.singapore(rp.getContent());
-
-			if (tupple == null) { continue; }
-
-			tupple.setUserId(rp.getId());
-			Singapore exist = store.findModelWithKey(rp.getId());
-			if (exist != null) { store.remove(exist); }
-			store.add(tupple);
-		}
+	public void setData(ArrayList<Singapore> data) {
+		store.clear();
+		store.addAll(data);
 	}
 
 	private static ColumnModel<Singapore> genCM() {
