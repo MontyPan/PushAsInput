@@ -8,6 +8,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import us.dontcareabout.PushAsInput.shared.RawPush;
+import us.dontcareabout.PushAsInput.shared.RawPushImpl;
 
 public class Fetch {
 	/**
@@ -25,7 +26,7 @@ public class Fetch {
 		}
 
 		for (Element e : doc.select(".push")) {
-			RawPush rp = new RawPush();
+			RawPushImpl rp = new RawPushImpl();
 			rp.setType(e.select(".push-tag").text());
 			rp.setId(e.select(".push-userid").text());
 			rp.setContent(e.select(".push-content").text());
