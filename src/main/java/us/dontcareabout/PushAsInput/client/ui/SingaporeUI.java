@@ -1,6 +1,7 @@
 package us.dontcareabout.PushAsInput.client.ui;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 
 import com.google.gwt.core.client.GWT;
@@ -38,13 +39,17 @@ public class SingaporeUI extends Composite {
 	}
 
 	private void process(ArrayList<RawPush> rawData) {
+		final Date now = new Date();
 		data.clear();
 		HashMap<String, Singapore> map = new HashMap<>();
 
 		for (RawPush rp : rawData) {
 			Singapore tupple = ContentParse.singapore(rp.getContent());
 
+			//parse 錯誤跳過
 			if (tupple == null) { continue; }
+			//時間超過也跳過
+			if (tupple.getDeadline() != null && tupple.getDeadline().getTime() < now.getTime()) { continue; }
 
 			tupple.setUserId(rp.getId());
 			Singapore old = map.put(tupple.getUserId(), tupple);
