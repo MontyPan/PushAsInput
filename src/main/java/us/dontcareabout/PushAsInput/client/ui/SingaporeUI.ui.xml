@@ -1,0 +1,22 @@
+<!DOCTYPE ui:UiBinder SYSTEM "http://dl.google.com/gwt/DTD/xhtml.ent">
+<ui:UiBinder xmlns:ui="urn:ui:com.google.gwt.uibinder"
+	xmlns:comp="urn:import:us.dontcareabout.PushAsInput.client.component" 
+	xmlns:c="urn:import:com.sencha.gxt.widget.core.client.container">
+
+	<ui:with field="margin" type="com.sencha.gxt.core.client.util.Margins">
+		<ui:attributes top="1" right="1" bottom="1" left="1" />
+	</ui:with>
+	<ui:with field="fullHLD" type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData">
+		<ui:attributes width="1" height="1" margins="{margin}" />
+	</ui:with>
+	<ui:with field="locationHLD" type="com.sencha.gxt.widget.core.client.container.HorizontalLayoutContainer.HorizontalLayoutData">
+		<ui:attributes width="300" height="1" />
+	</ui:with>
+	
+	<c:HorizontalLayoutContainer>
+		<comp:SingaporeGrid ui:field="grid" layoutData="{fullHLD}" />
+		<c:HorizontalLayoutContainer layoutData="{locationHLD}" scrollMode="AUTOY">
+			<comp:LocationList ui:field="locationList" layoutData="{fullHLD}" />
+		</c:HorizontalLayoutContainer>
+	</c:HorizontalLayoutContainer>
+</ui:UiBinder> 
