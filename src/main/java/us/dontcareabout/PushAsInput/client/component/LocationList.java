@@ -8,6 +8,7 @@ import com.sencha.gxt.chart.client.draw.RGB;
 import com.sencha.gxt.chart.client.draw.sprite.SpriteSelectionEvent;
 import com.sencha.gxt.chart.client.draw.sprite.SpriteSelectionEvent.SpriteSelectionHandler;
 
+import us.dontcareabout.PushAsInput.client.ui.SingaporeUI;
 import us.dontcareabout.PushAsInput.shared.Singapore;
 import us.dontcareabout.gxt.client.draw.LayerContainer;
 import us.dontcareabout.gxt.client.draw.LayerSprite;
@@ -28,10 +29,10 @@ public class LocationList extends LayerContainer {
 			}
 		}
 
-		ArrayList<String> foo = new ArrayList<>(map.keySet());
-		Collections.sort(foo);
+		ArrayList<String> location = new ArrayList<>(map.keySet());
+		Collections.sort(location);
 
-		for (String loc : foo) {
+		for (String loc : location) {
 			Button btn = new Button(loc, map.get(loc));
 			this.addLayer(btn);
 			btn.redraw(true);
@@ -55,18 +56,26 @@ public class LocationList extends LayerContainer {
 	}
 
 	class Button extends TextButton {
+		boolean select = false;
+
 		Button(final String text, int amount) {
-			setBgColor(RGB.DARKGRAY);
-			setTextColor(RGB.WHITE);
+			changeColor();
 			setBgRadius(10);
 			setText(text + " (" + amount + ")");
 
 			addSpriteSelectionHandler(new SpriteSelectionHandler() {
 				@Override
 				public void onSpriteSelect(SpriteSelectionEvent event) {
-					// TODO Auto-generated method stub
+					select = !select;
+					SingaporeUI.locationChange(text, select);
+					changeColor();
 				}
 			});
+		}
+
+		private void changeColor() {
+			setTextColor(select ? RGB.BLACK : RGB.WHITE);
+			setBgColor(select ? RGB.RED : RGB.BLACK);
 		}
 	}
 }

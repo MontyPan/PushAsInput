@@ -2,7 +2,6 @@ package us.dontcareabout.PushAsInput.client.component;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.editor.client.Editor.Path;
@@ -19,6 +18,9 @@ import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
 
+import us.dontcareabout.PushAsInput.client.data.LocationChangeEvent;
+import us.dontcareabout.PushAsInput.client.data.LocationChangeEvent.LocationChangeHandler;
+import us.dontcareabout.PushAsInput.client.ui.SingaporeUI;
 import us.dontcareabout.PushAsInput.shared.Singapore;
 import us.dontcareabout.gxt.client.model.NoExceptionValueProvider;
 
@@ -26,15 +28,7 @@ public class SingaporeGrid extends Grid<Singapore> {
 	static final Properties p = GWT.create(Properties.class);
 	static final DateTimeFormat dateFormat = DateTimeFormat.getFormat("yyyy/MM/dd");
 
-	private StoreFilter<Singapore> filter = new StoreFilter<Singapore>() {
-		private Date now = new Date();
-
-		@Override
-		public boolean select(Store<Singapore> store, Singapore parent, Singapore item) {
-			if (item.getDeadline() == null) { return true; }
-			return item.getDeadline().getTime() > now.getTime();
-		}
-	};
+	private Filter filter = new Filter();
 
 	public SingaporeGrid() {
 		super(new ListStore<>(p.id()), genCM());
@@ -52,6 +46,19 @@ public class SingaporeGrid extends Grid<Singapore> {
 		}, SortDir.ASC));
 		store.addFilter(filter);
 		store.setEnableFilters(true);
+
+		SingaporeUI.addLocationChange(new LocationChangeHandler() {
+			@Override
+			public void onLocationChange(LocationChangeEvent event) {
+				if (event.enable) {
+					filter.addLocation(event.location);
+				} else {
+					filter.removeLocation(event.location);
+				}
+				store.setEnableFilters(false);
+				store.setEnableFilters(true);
+			}
+		});
 	}
 
 	public void setData(ArrayList<Singapore> data) {
@@ -73,6 +80,25 @@ public class SingaporeGrid extends Grid<Singapore> {
 		}, 100, "截止日期"));
 		return new ColumnModel<>(result);
 	}
+
+	class Filter implements StoreFilter<Singapore> {
+		private ArrayList<String> list = new ArrayList<>();
+
+		@Override
+		public boolean select(Store<Singapore> store, Singapore parent, Singapore item) {
+			if (list.size() == 0) { return true; }
+
+			return list.contains(item.getLocation());
+		}
+
+		public void removeLocation(String location) {
+			list.remove(location);
+		}
+
+		public void addLocation(String location) {
+			list.add(location);
+		}
+	};
 
 	interface Properties extends PropertyAccess<Singapore> {
 		@Path("userId")
