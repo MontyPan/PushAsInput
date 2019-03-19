@@ -56,6 +56,7 @@ public class Fetch {
 	private static final Setting setting = new Setting();
 	private static final FetchSetting singapore = new FetchSetting("https://www.ptt.cc/bbs/Singapore/M.1535806897.A.57F.html", "Singapore.json");
 	private static final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd HH:mm");
+	private static final DynamicTicker ticker = new DynamicTicker();
 
 	public static void main(String[] args) {
 		ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -70,16 +71,24 @@ public class Fetch {
 					}
 				}
 			},
-			0, 1, TimeUnit.HOURS);
+			0, 1, TimeUnit.MINUTES
+		);
 	}
 
 	private static void routine() throws Exception {
+		if (ticker.isSleeping()) { return; }
+
+		String now = format.format(new Date());
+		System.out.print("Check @ " + now + "\t");
+
 		ArrayList<RawPush> result = process(singapore.getUrl());
 		Gson gson = new Gson();
 		String json = gson.toJson(result);
 		File file = new File(setting.repo(), singapore.getFileName());
 
 		if (json.equals(originData(file))) {
+			ticker.slower();
+			System.out.println("=> pass. Next time @ " + format.format(ticker.getNextTime()));
 			return;
 		}
 
@@ -93,15 +102,14 @@ public class Fetch {
 		ObjectId oid = repo.resolve("HEAD^");
 
 		Git git = new Git(repo);
-
-		String now = format.format(new Date());
 		git.reset().setRef(oid.getName()).call();
 		git.add().addFilepattern(".").call();
 		git.commit().setAll(true).setMessage(now).call();
 		git.push().setCredentialsProvider(cp).setForce(true).call();
 		git.close();
 
-		System.out.println("Finish @ " + now);
+		ticker.quicker();
+		System.out.println("=> DONE! Next time @ " + format.format(ticker.getNextTime()));
 	}
 
 	private static String originData(File file) {
@@ -115,4 +123,35 @@ public class Fetch {
 		}
 	}
 
+	//Refactory 抽去 GF？
+	static class DynamicTicker {
+		private int sleepMinutes = 10;
+		private Date nextTime = new Date();
+
+		boolean isSleeping() {
+			return nextTime.after(new Date());
+		}
+
+		void quicker() {
+			sleepMinutes = Math.max(sleepMinutes / 2, 1);
+			tick();
+		}
+
+		void slower() {
+			sleepMinutes = Math.min(sleepMinutes + 1, 60);
+			tick();
+		}
+
+		void tick() {
+			nextTime.setTime(nextTime.getTime() + sleepMinutes * 60000);
+		}
+
+		int getSleepMinutes() {
+			return sleepMinutes;
+		}
+
+		Date getNextTime() {
+			return new Date(nextTime.getTime());
+		}
+	}
 }
