@@ -76,9 +76,15 @@ public class Fetch {
 	private static void routine() throws Exception {
 		ArrayList<RawPush> result = process(singapore.getUrl());
 		Gson gson = new Gson();
+		String json = gson.toJson(result);
+		File file = new File(setting.repo(), singapore.getFileName());
+
+		if (json.equals(originData(file))) {
+			return;
+		}
+
 		Files.write(
-			gson.toJson(result).getBytes(Charsets.UTF_8),
-			new File(setting.repo(), singapore.getFileName())
+			json.getBytes(Charsets.UTF_8), file
 		);
 
 		CredentialsProvider cp = new UsernamePasswordCredentialsProvider(setting.username(), setting.password());
@@ -97,4 +103,16 @@ public class Fetch {
 
 		System.out.println("Finish @ " + now);
 	}
+
+	private static String originData(File file) {
+		try {
+			return Files.toString(
+				new File(setting.repo(), singapore.getFileName()),
+				Charsets.UTF_8
+			);
+		} catch (IOException e) {
+			return null;
+		}
+	}
+
 }
